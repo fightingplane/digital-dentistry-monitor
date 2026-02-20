@@ -5,7 +5,11 @@
 
 set -e
 
+# Get the current directory automatically
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "🚀 Deploying Digital Dentistry RSS Monitor..."
+echo "📁 Working directory: $SCRIPT_DIR"
 
 # Check if required environment variables are set
 if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
@@ -21,10 +25,10 @@ pip install feedparser requests python-telegram-bot pyyaml beautifulsoup4 lxml
 
 # Test the configuration
 echo "🧪 Testing configuration..."
-python rss_monitor.py --test
+python "$SCRIPT_DIR/rss_monitor.py" --test
 
 # Start the monitoring service (in production, you'd use systemd or cron)
 echo "✅ Deployment complete!"
-echo "💡 To run manually: python rss_monitor.py"
+echo "💡 To run manually: cd $SCRIPT_DIR && python rss_monitor.py"
 echo "⏰ To schedule automatic checks, add to crontab:"
-echo "   0 */6 * * * cd /path/to/digital-dentistry-monitor && python rss_monitor.py >> logs/monitor.log 2>&1"
+echo "   0 */6 * * * cd $SCRIPT_DIR && python rss_monitor.py >> $SCRIPT_DIR/logs/monitor.log 2>&1"
