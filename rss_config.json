@@ -3,80 +3,88 @@
         "bot_token": "8587699905:AAFPoaZhtvt9PfVZ3M2FygoXmp5z9j4mmNA",
         "chat_id": "7896544619"
     },
+    "check_interval_hours": 6,
+    "max_articles_per_check": 10,
+    "enable_summary": true,
+    "enable_priority_filtering": true,
+    "keywords": [
+        "digital dentistry", "digital dental", "intraoral scanner", 
+        "CAD/CAM", "3D printing dental", "dental 3D printing",
+        "AI dentistry", "artificial intelligence dental",
+        "dental software", "dental technology", "dental innovation",
+        "implant planning", "digital workflow", "dental scanner",
+        "口扫", "数字化牙科", "CAD/CAM", "3D打印牙科", "人工智能牙科"
+    ],
     "rss_sources": [
         {
             "name": "Dental Economics",
             "url": "https://www.dentaleconomics.com/rss",
-            "keywords": ["digital", "scanner", "CAD/CAM", "3D printing", "technology"],
-            "enabled": true
+            "enabled": true,
+            "category": "international_news",
+            "priority": "medium"
         },
         {
             "name": "Dentistry Today",
             "url": "https://www.dentistrytoday.com/feed/",
-            "keywords": ["digital dentistry", "technology", "innovation", "software"],
-            "enabled": true
+            "enabled": true,
+            "category": "international_news", 
+            "priority": "medium"
+        },
+        {
+            "name": "ADA News",
+            "url": "https://www.ada.org/en/publications/ada-news/rss-feed",
+            "enabled": true,
+            "category": "professional_association",
+            "priority": "high"
         },
         {
             "name": "Dental Tribune International",
             "url": "https://www.dental-tribune.com/feed/",
-            "keywords": ["digital dentistry", "intraoral scanner", "CAD/CAM", "3D printing"],
-            "enabled": true
+            "enabled": true,
+            "category": "international_news",
+            "priority": "medium"
         },
         {
             "name": "The Probe",
             "url": "https://www.the-probe.com/feed/",
-            "keywords": ["digital", "technology", "dentistry", "innovation"],
-            "enabled": true
-        },
-        {
-            "name": "Dental Product Shopper",
-            "url": "https://www.dentalproductshopper.com/rss",
-            "keywords": ["digital", "scanner", "software", "3D printing", "CAD/CAM"],
-            "enabled": true
-        },
-        {
-            "name": "Journal of Digital Dentistry",
-            "url": "https://www.journalofdigitaldentistry.com/feed/",
-            "keywords": ["digital dentistry", "research", "clinical", "technology"],
-            "enabled": true
-        },
-        {
-            "name": "3Shape Blog",
-            "url": "https://www.3shape.com/en/blog/feed/",
-            "keywords": ["intraoral", "scanner", "software", "digital workflow"],
-            "enabled": true
+            "enabled": true,
+            "category": "uk_dental_media",
+            "priority": "medium"
         },
         {
             "name": "Align Technology News",
             "url": "https://news.invisalign.com/feed/",
-            "keywords": ["Invisalign", "digital", "orthodontics", "3D printing"],
-            "enabled": true
+            "enabled": true,
+            "category": "company_news",
+            "priority": "high"
         },
         {
-            "name": "exocad News",
-            "url": "https://www.exocad.com/news/feed/",
-            "keywords": ["CAD/CAM", "dental software", "digital dentistry", "design"],
-            "enabled": true
+            "name": "exocad Blog",
+            "url": "https://www.exocad.com/blog/feed/",
+            "enabled": true,
+            "category": "software_company",
+            "priority": "high"
         },
         {
             "name": "PubMed - Digital Dentistry",
             "url": "https://pubmed.ncbi.nlm.nih.gov/?term=digital+dentistry&sort=date&format=rss",
-            "keywords": ["digital dentistry", "research", "clinical study", "technology"],
-            "enabled": true
+            "enabled": true,
+            "category": "academic_research",
+            "priority": "high"
         },
         {
             "name": "中华口腔医学会",
-            "url": "http://www.csa.org.cn/rss.xml",
-            "keywords": ["数字化", "口腔", "牙科", "技术", "3D打印"],
-            "enabled": true
+            "url": "http://www.csa.org.cn/xwzx/zyxw/rss.xml",
+            "enabled": true,
+            "category": "chinese_professional",
+            "priority": "high"
         },
         {
             "name": "今日口腔",
             "url": "https://www.kq88.com/rss.xml",
-            "keywords": ["数字化", "口腔", "牙科", "技术", "设备"],
-            "enabled": true
+            "enabled": true,
+            "category": "chinese_dental_media",
+            "priority": "medium"
         }
-    ],
-    "check_interval_hours": 6,
-    "max_articles_per_check": 10
+    ]
 }

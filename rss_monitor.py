@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-齿科数字化资讯 RSS 监控脚本
-自动监控多个 RSS 源，过滤关键词，并通过 Telegram 发送通知
+齿科数字化资讯 RSS 监控脚本（带智能摘要）
+自动监控多个 RSS 源，过滤关键词，生成摘要，并通过 Telegram 发送通知
 """
 
 import feedparser
@@ -11,6 +11,18 @@ import time
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
+
+# 导入摘要模块
+try:
+    from summarize_content import generate_summary_and_priority
+except ImportError:
+    def generate_summary_and_priority(title, content, source):
+        """备用摘要函数"""
+        return {
+            'summary': content[:200] + "..." if len(content) > 200 else content,
+            'priority': 'medium',
+            'priority_emoji': '🟡'
+        }
 
 # 配置文件路径
 CONFIG_FILE = "rss_config.json"
@@ -25,28 +37,39 @@ DEFAULT_CONFIG = {
         "digital dentistry", "digital dental", "intraoral scanner", 
         "CAD/CAM", "3D printing dental", "dental 3D printing",
         "AI dentistry", "artificial intelligence dental",
-        "dental software", "dental technology", "dental innovation"
+        "dental software", "dental technology", "dental innovation",
+        "implant planning", "digital workflow", "dental scanner"
     ],
     "rss_sources": [
         {
             "name": "Dental Economics",
             "url": "https://www.dentaleconomics.com/rss",
-            "enabled": True
+            "enabled": True,
+            "category": "news"
         },
         {
             "name": "Dentistry Today",
             "url": "https://www.dentistrytoday.com/feed/",
-            "enabled": True
+            "enabled": True,
+            "category": "news"
         },
         {
             "name": "ADA News",
             "url": "https://www.ada.org/en/publications/ada-news/rss-feed",
-            "enabled": True
+            "enabled": True,
+            "category": "association"
+        },
+        {
+            "name": "Dental Tribune International",
+            "url": "https://www.dental-tribune.com/feed/",
+            "enabled": True,
+            "category": "international"
         },
         {
             "name": "PubMed - Digital Dentistry",
             "url": "https://pubmed.ncbi.nlm.nih.gov/?term=digital+dentistry&sort=date&format=rss",
-            "enabled": True
+            "enabled": True,
+            "category": "research"
         }
     ]
 }
@@ -122,12 +145,16 @@ def check_rss_sources(config, last_check):
             
         source_name = source['name']
         source_url = source['url']
+        source_category = source.get('category', 'general')
         
         print(f"检查 {source_name}...")
         
         # 获取上次检查时间
         last_check_time = last_check.get(source_name, "1970-01-01T00:00:00")
-        last_check_dt = datetime.fromisoformat(last_check_time.replace('Z', '+00:00'))
+        try:
+            last_check_dt = datetime.fromisoformat(last_check_time.replace('Z', '+00:00'))
+        except ValueError:
+            last_check_dt = datetime(1970, 1, 1)
         
         # 获取 RSS feed
         feed = fetch_rss_feed(source_url)
@@ -168,12 +195,18 @@ def check_rss_sources(config, last_check):
                 
                 full_text = f"{title} {summary} {content}"
                 if contains_keywords(full_text, config['keywords']):
+                    # 生成摘要和优先级
+                    summary_result = generate_summary_and_priority(title, full_text, source_name)
+                    
                     article = {
                         'source': source_name,
                         'title': title,
                         'link': entry.link,
                         'published': published,
-                        'summary': summary[:200] + "..." if len(summary) > 200 else summary
+                        'summary': summary_result['summary'],
+                        'priority': summary_result['priority'],
+                        'priority_emoji': summary_result['priority_emoji'],
+                        'category': source_category
                     }
                     source_new_articles.append(article)
         
@@ -184,32 +217,61 @@ def check_rss_sources(config, last_check):
             print(f"  无新文章")
     
     # 更新最后检查时间
-    last_check[source_name] = current_time.isoformat()
+    last_check[current_time.isoformat()] = current_time.isoformat()
     
     return new_articles, last_check
 
 def format_telegram_message(articles):
-    """格式化 Telegram 消息"""
+    """格式化 Telegram 消息（带优先级分类）"""
     if not articles:
         return None
         
+    # 按优先级分组
+    high_priority = [a for a in articles if a['priority'] == 'high']
+    medium_priority = [a for a in articles if a['priority'] == 'medium']
+    low_priority = [a for a in articles if a['priority'] == 'low']
+    
     message = "🦷 <b>齿科数字化资讯更新</b>\n\n"
     
-    for article in articles[:10]:  # 最多显示10篇文章
-        message += f"📰 <b>{article['source']}</b>\n"
-        message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
-        if article['summary']:
-            message += f"📝 {article['summary']}\n"
-        message += f"⏰ {article['published']}\n\n"
+    # 高优先级
+    if high_priority:
+        message += "🔴 <b>高重要性</b>\n"
+        for article in high_priority[:5]:
+            message += f"📰 {article['priority_emoji']} <b>{article['source']}</b>\n"
+            message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
+            if article['summary']:
+                message += f"📝 {article['summary']}\n"
+            message += f"⏰ {article['published']}\n\n"
     
-    if len(articles) > 10:
-        message += f"... 还有 {len(articles) - 10} 篇文章\n"
+    # 中优先级  
+    if medium_priority:
+        message += "🟡 <b>中重要性</b>\n"
+        for article in medium_priority[:5]:
+            message += f"📰 {article['priority_emoji']} <b>{article['source']}</b>\n"
+            message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
+            if article['summary']:
+                message += f"📝 {article['summary']}\n"
+            message += f"⏰ {article['published']}\n\n"
+    
+    # 低优先级
+    if low_priority:
+        message += "🟢 <b>低重要性</b>\n"
+        for article in low_priority[:3]:
+            message += f"📰 {article['priority_emoji']} <b>{article['source']}</b>\n"
+            message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
+            if article['summary']:
+                message += f"📝 {article['summary']}\n"
+            message += f"⏰ {article['published']}\n\n"
+    
+    total_count = len(articles)
+    if total_count > 13:  # 5+5+3
+        message += f"... 还有 {total_count - 13} 篇文章\n"
     
     return message
 
 def main():
     """主函数"""
-    print("🦷 齿科数字化 RSS 监控启动...")
+    print("🦷 齿科数字化 RSS 监控启动（带智能摘要）...")
     
     # 加载配置
     config = load_config()
