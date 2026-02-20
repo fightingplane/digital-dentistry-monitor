@@ -1,0 +1,62 @@
+# 齿科数字化 RSS 监控配置
+telegram:
+  chat_id: "YOUR_TELEGRAM_CHAT_ID"  # 替换为你的 Telegram 聊天 ID
+
+# 监控频率 (秒)
+check_interval: 3600  # 每小时检查一次
+
+# 关键词过滤 (包含任一关键词即推送)
+keywords:
+  - "digital dentistry"
+  - "intraoral scanner"
+  - "CAD/CAM"
+  - "3D printing dental"
+  - "dental software"
+  - "AI dentistry"
+  - "digital workflow"
+  - "口扫"
+  - "数字化牙科"
+  - "齿科数字化"
+
+# RSS 源列表
+rss_sources:
+  # 学术和研究
+  - name: "PubMed Digital Dentistry"
+    url: "https://pubmed.ncbi.nlm.nih.gov/rss/search/1vXKqUxRrG5MkF9Q/?limit=20&format=xml"
+    enabled: true
+  
+  # 行业新闻 (需要验证实际 RSS URL)
+  - name: "Dental Tribune International"
+    url: "https://www.dental-tribune.com/feed/"
+    enabled: true
+    
+  - name: "Dentistry Today"
+    url: "https://www.dentistrytoday.com/feed/"
+    enabled: true
+
+  # 公司博客
+  - name: "3Shape Blog"
+    url: "https://www.3shape.com/en/blog/feed/"
+    enabled: true
+    
+  - name: "Align Technology News"
+    url: "https://news.invisalign.com/feed/"
+    enabled: true
+
+  # 技术社区
+  - name: "Reddit r/Dentistry"
+    url: "https://www.reddit.com/r/Dentistry/new/.rss"
+    enabled: true
+
+# 备用网页监控源 (无RSS时使用)
+web_sources:
+  - name: "Dental Economics"
+    url: "https://www.dentaleconomics.com/topics/digital-dentistry"
+    selector: "article h3 a"  # CSS选择器提取文章链接
+    enabled: false  # 暂时禁用，优先使用RSS
+
+# 推送设置
+notification:
+  max_articles_per_check: 5  # 每次检查最多推送5篇文章
+  include_summary: true      # 包含文章摘要
+  include_image: true        # 包含文章图片
