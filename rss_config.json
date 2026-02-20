@@ -1,33 +1,82 @@
 {
-  "telegram_bot_token": "8587699905:AAFPoaZhtvt9PfVZ3M2FygoXmp5z9j4mmNA",
-  "telegram_chat_id": "7896544619",
-  "check_interval_hours": 1,
-  "keywords": [
-    "digital dentistry", "digital dental", "intraoral scanner", 
-    "CAD/CAM", "3D printing dental", "dental 3D printing",
-    "AI dentistry", "artificial intelligence dental",
-    "dental software", "dental technology", "dental innovation"
-  ],
-  "rss_sources": [
-    {
-      "name": "Dental Economics",
-      "url": "https://www.dentaleconomics.com/rss",
-      "enabled": true
+    "telegram": {
+        "bot_token": "8587699905:AAFPoaZhtvt9PfVZ3M2FygoXmp5z9j4mmNA",
+        "chat_id": "7896544619"
     },
-    {
-      "name": "Dentistry Today",
-      "url": "https://www.dentistrytoday.com/feed/",
-      "enabled": true
-    },
-    {
-      "name": "ADA News",
-      "url": "https://www.ada.org/en/publications/ada-news/rss-feed",
-      "enabled": true
-    },
-    {
-      "name": "PubMed - Digital Dentistry",
-      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=digital+dentistry&sort=date&format=rss",
-      "enabled": true
-    }
-  ]
+    "rss_sources": [
+        {
+            "name": "Dental Economics",
+            "url": "https://www.dentaleconomics.com/rss",
+            "keywords": ["digital", "scanner", "CAD/CAM", "3D printing", "technology"],
+            "enabled": true
+        },
+        {
+            "name": "Dentistry Today",
+            "url": "https://www.dentistrytoday.com/feed/",
+            "keywords": ["digital dentistry", "technology", "innovation", "software"],
+            "enabled": true
+        },
+        {
+            "name": "Dental Tribune International",
+            "url": "https://www.dental-tribune.com/feed/",
+            "keywords": ["digital dentistry", "intraoral scanner", "CAD/CAM", "3D printing"],
+            "enabled": true
+        },
+        {
+            "name": "The Probe",
+            "url": "https://www.the-probe.com/feed/",
+            "keywords": ["digital", "technology", "dentistry", "innovation"],
+            "enabled": true
+        },
+        {
+            "name": "Dental Product Shopper",
+            "url": "https://www.dentalproductshopper.com/rss",
+            "keywords": ["digital", "scanner", "software", "3D printing", "CAD/CAM"],
+            "enabled": true
+        },
+        {
+            "name": "Journal of Digital Dentistry",
+            "url": "https://www.journalofdigitaldentistry.com/feed/",
+            "keywords": ["digital dentistry", "research", "clinical", "technology"],
+            "enabled": true
+        },
+        {
+            "name": "3Shape Blog",
+            "url": "https://www.3shape.com/en/blog/feed/",
+            "keywords": ["intraoral", "scanner", "software", "digital workflow"],
+            "enabled": true
+        },
+        {
+            "name": "Align Technology News",
+            "url": "https://news.invisalign.com/feed/",
+            "keywords": ["Invisalign", "digital", "orthodontics", "3D printing"],
+            "enabled": true
+        },
+        {
+            "name": "exocad News",
+            "url": "https://www.exocad.com/news/feed/",
+            "keywords": ["CAD/CAM", "dental software", "digital dentistry", "design"],
+            "enabled": true
+        },
+        {
+            "name": "PubMed - Digital Dentistry",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/?term=digital+dentistry&sort=date&format=rss",
+            "keywords": ["digital dentistry", "research", "clinical study", "technology"],
+            "enabled": true
+        },
+        {
+            "name": "中华口腔医学会",
+            "url": "http://www.csa.org.cn/rss.xml",
+            "keywords": ["数字化", "口腔", "牙科", "技术", "3D打印"],
+            "enabled": true
+        },
+        {
+            "name": "今日口腔",
+            "url": "https://www.kq88.com/rss.xml",
+            "keywords": ["数字化", "口腔", "牙科", "技术", "设备"],
+            "enabled": true
+        }
+    ],
+    "check_interval_hours": 6,
+    "max_articles_per_check": 10
 }
