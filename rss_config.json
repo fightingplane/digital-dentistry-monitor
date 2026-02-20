@@ -1,8 +1,4 @@
 {
-    "telegram": {
-        "bot_token": "8587699905:AAFPoaZhtvt9PfVZ3M2FygoXmp5z9j4mmNA",
-        "chat_id": "7896544619"
-    },
     "check_interval_hours": 6,
     "max_articles_per_check": 10,
     "enable_summary": true,

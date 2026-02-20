@@ -1,0 +1,101 @@
+{
+  "telegram_bot_token": "8587699905:AAFPoaZhtvt9PfVZ3M2FygoXmp5z9j4mmNA",
+  "telegram_chat_id": "7896544619",
+  "check_interval_hours": 6,
+  "max_articles_per_check": 10,
+  "enable_summary": true,
+  "enable_priority_filtering": true,
+  "keywords": [
+    "digital dentistry",
+    "digital dental",
+    "intraoral scanner",
+    "CAD/CAM",
+    "3D printing dental",
+    "dental 3D printing",
+    "AI dentistry",
+    "artificial intelligence dental",
+    "dental software",
+    "dental technology",
+    "dental innovation",
+    "implant planning",
+    "digital workflow",
+    "dental scanner",
+    "口扫",
+    "数字化牙科",
+    "CAD/CAM",
+    "3D打印牙科",
+    "人工智能牙科"
+  ],
+  "rss_sources": [
+    {
+      "name": "Dental Economics",
+      "url": "https://www.dentaleconomics.com/rss",
+      "enabled": true,
+      "category": "international_news",
+      "priority": "medium"
+    },
+    {
+      "name": "Dentistry Today",
+      "url": "https://www.dentistrytoday.com/feed/",
+      "enabled": true,
+      "category": "international_news",
+      "priority": "medium"
+    },
+    {
+      "name": "ADA News",
+      "url": "https://www.ada.org/en/publications/ada-news/rss-feed",
+      "enabled": true,
+      "category": "professional_association",
+      "priority": "high"
+    },
+    {
+      "name": "Dental Tribune International",
+      "url": "https://www.dental-tribune.com/feed/",
+      "enabled": true,
+      "category": "international_news",
+      "priority": "medium"
+    },
+    {
+      "name": "The Probe",
+      "url": "https://www.the-probe.com/feed/",
+      "enabled": true,
+      "category": "uk_dental_media",
+      "priority": "medium"
+    },
+    {
+      "name": "Align Technology News",
+      "url": "https://news.invisalign.com/feed/",
+      "enabled": true,
+      "category": "company_news",
+      "priority": "high"
+    },
+    {
+      "name": "exocad Blog",
+      "url": "https://www.exocad.com/blog/feed/",
+      "enabled": true,
+      "category": "software_company",
+      "priority": "high"
+    },
+    {
+      "name": "PubMed - Digital Dentistry",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/?term=digital+dentistry&sort=date&format=rss",
+      "enabled": true,
+      "category": "academic_research",
+      "priority": "high"
+    },
+    {
+      "name": "中华口腔医学会",
+      "url": "http://www.csa.org.cn/xwzx/zyxw/rss.xml",
+      "enabled": true,
+      "category": "chinese_professional",
+      "priority": "high"
+    },
+    {
+      "name": "今日口腔",
+      "url": "https://www.kq88.com/rss.xml",
+      "enabled": true,
+      "category": "chinese_dental_media",
+      "priority": "medium"
+    }
+  ]
+}
