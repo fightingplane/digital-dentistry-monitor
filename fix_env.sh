@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# 修复环境变量格式
+export TELEGRAM_BOT_TOKEN="8587699905:AAFPoaZhtvt9PfVZ3M2FygoXmp5z9j4mmNA"
+export TELEGRAM_CHAT_ID="7896544619"
+
+echo "✅ 环境变量已正确设置"
+echo "TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}"
+echo "TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}"
