@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Digital Dentistry RSS Monitor
-Secure version with environment variable configuration
+Monitors multiple RSS sources for digital dentistry content with AI summarization.
 """
 
 import feedparser
@@ -9,10 +9,11 @@ import requests
 import json
 import time
 import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Configuration paths
+# Configuration
 CONFIG_FILE = "rss_config.json"
 LAST_CHECK_FILE = "last_check.json"
 
@@ -23,46 +24,68 @@ def load_config():
             return json.load(f)
     else:
         print(f"❌ Configuration file {CONFIG_FILE} not found!")
+        sys.exit(1)
+
+def get_env_config():
+    """Get configuration from environment variables"""
+    config = {}
+    config['telegram_bot_token'] = os.environ.get('TELEGRAM_BOT_TOKEN')
+    config['telegram_chat_id'] = os.environ.get('TELEGRAM_CHAT_ID')
+    
+    if not config['telegram_bot_token'] or not config['telegram_chat_id']:
+        print("❌ TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables required!")
+        sys.exit(1)
+    
+    return config
+
+def test_telegram_connection(bot_token, chat_id):
+    """Test Telegram connection"""
+    try:
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": "✅ Digital Dentistry Monitor: Configuration test successful!",
+            "parse_mode": "HTML"
+        }
+        response = requests.post(url, json=payload, timeout=10)
+        return response.status_code == 200
+    except Exception as e:
+        print(f"❌ Telegram connection failed: {e}")
+        return False
+
+def fetch_rss_feed(url):
+    """Fetch RSS feed"""
+    try:
+        feed = feedparser.parse(url)
+        return feed
+    except Exception as e:
+        print(f"⚠️  RSS fetch failed ({url}): {e}")
         return None
 
-def load_last_check():
-    """Load last check timestamps"""
-    if os.path.exists(LAST_CHECK_FILE):
-        with open(LAST_CHECK_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
-
-def save_last_check(last_check):
-    """Save last check timestamps"""
-    with open(LAST_CHECK_FILE, 'w', encoding='utf-8') as f:
-        json.dump(last_check, f, indent=2)
-
 def parse_datetime(date_string):
-    """Parse various datetime formats to timezone-aware datetime"""
+    """Parse various datetime formats"""
     if not date_string:
         return datetime.now(timezone.utc)
     
-    # Try common RSS datetime formats
+    # Try common formats
     formats = [
         '%Y-%m-%dT%H:%M:%SZ',
         '%a, %d %b %Y %H:%M:%S %z',
-        '%Y-%m-%d %H:%M:%S'
+        '%Y-%m-%d %H:%M:%S',
+        '%Y-%m-%dT%H:%M:%S%z'
     ]
     
     for fmt in formats:
         try:
-            dt = datetime.strptime(date_string, fmt)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            return dt
+            return datetime.strptime(date_string, fmt).replace(tzinfo=timezone.utc)
         except ValueError:
             continue
     
-    # If all parsing fails, return current time
+    # If all fail, return current time
     return datetime.now(timezone.utc)
 
 def contains_keywords(text, keywords):
-    """Check if text contains any of the keywords"""
+    """Check if text contains any keywords"""
     if not text:
         return False
     text_lower = text.lower()
@@ -71,16 +94,8 @@ def contains_keywords(text, keywords):
             return True
     return False
 
-def send_telegram_message(message):
-    """Send message via Telegram using environment variables"""
-    import os
-    bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
-    chat_id = os.getenv('TELEGRAM_CHAT_ID')
-    
-    if not bot_token or not chat_id:
-        print("❌ TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set in environment variables")
-        return False
-    
+def send_telegram_message(bot_token, chat_id, message):
+    """Send Telegram message"""
     try:
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         payload = {
@@ -95,12 +110,56 @@ def send_telegram_message(message):
         print(f"❌ Telegram message failed: {e}")
         return False
 
+def load_last_check():
+    """Load last check times"""
+    if os.path.exists(LAST_CHECK_FILE):
+        with open(LAST_CHECK_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
+
+def save_last_check(last_check):
+    """Save last check times"""
+    with open(LAST_CHECK_FILE, 'w', encoding='utf-8') as f:
+        json.dump(last_check, f, indent=2)
+
+def generate_summary_and_priority(title, content, source):
+    """Generate summary and priority (simplified version)"""
+    # Simple priority logic based on source and keywords
+    high_priority_sources = ['ADA News', 'Align Technology News', 'exocad Blog']
+    high_priority_keywords = ['launch', 'new product', 'breakthrough', 'innovation', 'release']
+    
+    priority = 'medium'
+    priority_emoji = '🟡'
+    
+    if source in high_priority_sources:
+        priority = 'high'
+        priority_emoji = '🔴'
+    elif any(kw in content.lower() for kw in high_priority_keywords):
+        priority = 'high'
+        priority_emoji = '🔴'
+    elif 'update' in content.lower() or 'news' in content.lower():
+        priority = 'low'
+        priority_emoji = '🟢'
+    
+    # Simple summary (first 200 characters)
+    summary = content[:200] + "..." if len(content) > 200 else content
+    
+    return {
+        'summary': summary,
+        'priority': priority,
+        'priority_emoji': priority_emoji
+    }
+
 def check_rss_sources(config, last_check):
-    """Check all RSS sources for new articles"""
+    """Check all RSS sources"""
     new_articles = []
     current_time = datetime.now(timezone.utc)
     
-    for source in config['rss_sources']:
+    rss_config = load_config()
+    keywords = rss_config.get('keywords', [])
+    sources = rss_config.get('rss_sources', [])
+    
+    for source in sources:
         if not source.get('enabled', True):
             continue
             
@@ -109,18 +168,14 @@ def check_rss_sources(config, last_check):
         
         print(f"🔍 Checking {source_name}...")
         
-        # Get last check time for this source
+        # Get last check time
         last_check_time = last_check.get(source_name, "1970-01-01T00:00:00Z")
         last_check_dt = parse_datetime(last_check_time)
         
         # Fetch RSS feed
-        try:
-            feed = feedparser.parse(source_url)
-            if not feed.entries:
-                print(f"   ⚠️  No data for {source_name}")
-                continue
-        except Exception as e:
-            print(f"   ❌ Error fetching {source_name}: {e}")
+        feed = fetch_rss_feed(source_url)
+        if not feed or not feed.entries:
+            print(f"   ⚠️  No data for {source_name}")
             continue
         
         # Check for new articles
@@ -129,20 +184,24 @@ def check_rss_sources(config, last_check):
             published = getattr(entry, 'published', getattr(entry, 'updated', ''))
             pub_dt = parse_datetime(published)
             
-            # Check if article is newer than last check
+            # Check if article is new
             if pub_dt > last_check_dt:
                 title = getattr(entry, 'title', '')
                 summary = getattr(entry, 'summary', '')
                 content = getattr(entry, 'content', [{}])[0].get('value', '') if entry.get('content') else ''
                 
                 full_text = f"{title} {summary} {content}"
-                if contains_keywords(full_text, config['keywords']):
+                if contains_keywords(full_text, keywords):
+                    summary_result = generate_summary_and_priority(title, full_text, source_name)
+                    
                     article = {
                         'source': source_name,
                         'title': title,
                         'link': entry.link,
                         'published': published,
-                        'summary': summary[:200] + "..." if len(summary) > 200 else summary
+                        'summary': summary_result['summary'],
+                        'priority': summary_result['priority'],
+                        'priority_emoji': summary_result['priority_emoji']
                     }
                     source_new_articles.append(article)
         
@@ -152,64 +211,88 @@ def check_rss_sources(config, last_check):
         else:
             print(f"   📭 No new articles")
         
-        # Update last check time for this source
+        # Update last check time
         last_check[source_name] = current_time.isoformat()
     
     return new_articles, last_check
 
 def format_telegram_message(articles):
-    """Format articles into Telegram message"""
+    """Format Telegram message with priority grouping"""
     if not articles:
         return None
         
-    message = "🦷 <b>Digital Dentistry News Update</b>\n\n"
+    # Group by priority
+    high_priority = [a for a in articles if a['priority'] == 'high']
+    medium_priority = [a for a in articles if a['priority'] == 'medium']
+    low_priority = [a for a in articles if a['priority'] == 'low']
     
-    for article in articles[:10]:
-        message += f"📰 <b>{article['source']}</b>\n"
-        message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
-        if article['summary']:
-            message += f"📝 {article['summary']}\n"
-        message += f"⏰ {article['published']}\n\n"
+    message = "🦷 <b>Digital Dentistry Updates</b>\n\n"
     
-    if len(articles) > 10:
-        message += f"... and {len(articles) - 10} more articles\n"
+    if high_priority:
+        message += "🔴 <b>High Priority</b>\n"
+        for article in high_priority[:5]:
+            message += f"📰 {article['source']}\n"
+            message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
+            if article['summary']:
+                message += f"📝 {article['summary']}\n"
+            message += "\n"
     
-    return message
+    if medium_priority:
+        message += "🟡 <b>Medium Priority</b>\n"
+        for article in medium_priority[:5]:
+            message += f"📰 {article['source']}\n"
+            message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
+            if article['summary']:
+                message += f"📝 {article['summary']}\n"
+            message += "\n"
+    
+    if low_priority:
+        message += "🟢 <b>Low Priority</b>\n"
+        for article in low_priority[:3]:
+            message += f"📰 {article['source']}\n"
+            message += f"🔗 <a href='{article['link']}'>{article['title']}</a>\n"
+            if article['summary']:
+                message += f"📝 {article['summary']}\n"
+            message += "\n"
+    
+    return message.strip()
 
 def main():
     """Main function"""
     print("🦷 Digital Dentistry RSS Monitor starting...")
     
-    # Load configuration
-    config = load_config()
-    if not config:
-        return
-    
-    print("✅ Configuration loaded successfully")
-    
-    # Check environment variables
-    import os
-    if not os.getenv('TELEGRAM_BOT_TOKEN') or not os.getenv('TELEGRAM_CHAT_ID'):
-        print("❌ Please set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables")
-        return
-    
+    # Load configurations
+    env_config = get_env_config()
     print("✅ Environment variables configured securely")
+    
+    # Test Telegram connection in test mode
+    if '--test' in sys.argv:
+        print("🧪 Testing Telegram connection...")
+        if test_telegram_connection(env_config['telegram_bot_token'], env_config['telegram_chat_id']):
+            print("✅ Telegram connection successful!")
+        else:
+            print("❌ Telegram connection failed!")
+            sys.exit(1)
+        return
+    
+    # Load RSS configuration
+    if not os.path.exists(CONFIG_FILE):
+        print(f"❌ Configuration file {CONFIG_FILE} not found!")
+        sys.exit(1)
+    print("✅ Configuration loaded successfully")
     
     # Load last check times
     last_check = load_last_check()
     
     # Check RSS sources
-    new_articles, updated_last_check = check_rss_sources(config, last_check)
+    new_articles, updated_last_check = check_rss_sources(env_config, last_check)
     
     if new_articles:
         print(f"✅ Found {len(new_articles)} relevant articles")
-        
-        # Format and send Telegram message
         message = format_telegram_message(new_articles)
         if message:
-            success = send_telegram_message(message)
-            if success:
-                print("✅ Telegram message sent successfully")
+            if send_telegram_message(env_config['telegram_bot_token'], env_config['telegram_chat_id'], message):
+                print("✅ Telegram message sent successfully!")
             else:
                 print("❌ Failed to send Telegram message")
     else:
