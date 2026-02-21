@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/linuxbrew/.linuxbrew/bin/python3
 """
 Digital Dentistry RSS Monitor
 Monitors multiple RSS sources for digital dentistry content with AI summarization.
