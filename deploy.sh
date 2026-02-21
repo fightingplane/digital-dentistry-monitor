@@ -7,6 +7,7 @@ set -e
 
 # Get the current directory automatically
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$SCRIPT_DIR/venv"
 
 echo "🚀 Deploying Digital Dentistry RSS Monitor..."
 echo "📁 Working directory: $SCRIPT_DIR"
@@ -22,16 +23,28 @@ fi
 # Create logs directory
 mkdir -p "$SCRIPT_DIR/logs"
 
+# Setup Python virtual environment
+if [ ! -d "$VENV_DIR" ]; then
+    echo "🐍 Creating Python virtual environment..."
+    python3 -m venv "$VENV_DIR"
+fi
+
+# Activate virtual environment
+source "$VENV_DIR/bin/activate"
+echo "🐍 Using Python: $(which python3)"
+
 # Install dependencies
 echo "📦 Installing dependencies..."
-/usr/bin/env python3 -m pip install feedparser requests python-telegram-bot pyyaml beautifulsoup4 lxml
+pip install --upgrade pip
+pip install feedparser requests python-telegram-bot pyyaml beautifulsoup4 lxml
 
 # Test the configuration
 echo "🧪 Testing configuration..."
 python3 "$SCRIPT_DIR/rss_monitor.py" --test
 
 # Setup crontab (every 6 hours)
-PYTHON_PATH="/usr/bin/env python3"
+# Use the venv python directly so cron doesn't need to activate
+PYTHON_PATH="$VENV_DIR/bin/python3"
 CRON_JOB="0 */6 * * * TELEGRAM_BOT_TOKEN='$TELEGRAM_BOT_TOKEN' TELEGRAM_CHAT_ID='$TELEGRAM_CHAT_ID' $PYTHON_PATH $SCRIPT_DIR/rss_monitor.py >> $SCRIPT_DIR/logs/monitor.log 2>&1"
 
 # Check if cron job already exists, avoid duplicates
@@ -46,7 +59,7 @@ else
 fi
 
 echo "✅ Deployment complete!"
-echo "💡 To run manually: cd $SCRIPT_DIR && python3 rss_monitor.py"
+echo "💡 To run manually: cd $SCRIPT_DIR && source venv/bin/activate && python3 rss_monitor.py"
 echo "⏰ Crontab configured: every 6 hours"
 echo "📋 Current crontab:"
 crontab -l
