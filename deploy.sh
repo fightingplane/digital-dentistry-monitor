@@ -24,14 +24,14 @@ mkdir -p "$SCRIPT_DIR/logs"
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-pip install feedparser requests python-telegram-bot pyyaml beautifulsoup4 lxml
+pip3 install feedparser requests python-telegram-bot pyyaml beautifulsoup4 lxml
 
 # Test the configuration
 echo "🧪 Testing configuration..."
-python "$SCRIPT_DIR/rss_monitor.py" --test
+python3 "$SCRIPT_DIR/rss_monitor.py" --test
 
 # Setup crontab (every 6 hours)
-PYTHON_PATH="$(which python)"
+PYTHON_PATH="$(which python3)"
 CRON_JOB="0 */6 * * * TELEGRAM_BOT_TOKEN='$TELEGRAM_BOT_TOKEN' TELEGRAM_CHAT_ID='$TELEGRAM_CHAT_ID' $PYTHON_PATH $SCRIPT_DIR/rss_monitor.py >> $SCRIPT_DIR/logs/monitor.log 2>&1"
 
 # Check if cron job already exists, avoid duplicates
@@ -46,7 +46,7 @@ else
 fi
 
 echo "✅ Deployment complete!"
-echo "💡 To run manually: cd $SCRIPT_DIR && python rss_monitor.py"
+echo "💡 To run manually: cd $SCRIPT_DIR && python3 rss_monitor.py"
 echo "⏰ Crontab configured: every 6 hours"
 echo "📋 Current crontab:"
 crontab -l
